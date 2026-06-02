@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkNest — Jobs for Indian Students in Europe</title>
+<meta name="description" content="WorkNest connects Indian students with verified part-time jobs in Europe. Transparent pay, real timings, zero fraud.">
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0D0F14;--bg2:#13161D;--bg3:#1A1E28;--card:#1E2330;
+  --accent:#4AE5A2;--accent2:#FF9A3C;--text:#F0F2F8;
+  --muted:#7B82A0;--border:#2A2F40;--danger:#FF6B6B;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+h1,h2,h3,.brand{font-family:'Syne',sans-serif}
+
+/* ─── NAV ─── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2.5rem;background:rgba(13,15,20,0.97);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border)}
+.brand{font-size:1.5rem;font-weight:800;letter-spacing:-0.5px;cursor:pointer}
+.brand span{color:var(--accent)}
+.nav-links{display:flex;gap:1.5rem;list-style:none;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.9rem;cursor:pointer;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--accent);color:#0D0F14;padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+.nav-cta:hover{opacity:0.85}
+
+/* ─── PAGES ─── */
+.page{display:none;min-height:calc(100vh - 65px)}
+.page.active{display:block}
+
+/* ─── HERO ─── */
+.hero{padding:5rem 2.5rem 3.5rem;max-width:920px;margin:0 auto;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,154,60,0.12);border:1px solid rgba(255,154,60,0.3);color:var(--accent2);padding:0.4rem 1rem;border-radius:100px;font-size:0.8rem;font-weight:600;margin-bottom:2rem}
+.pulse{width:7px;height:7px;background:var(--accent2);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero h1{font-size:clamp(2.4rem,5.5vw,4rem);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:1.5rem}
+.hl{color:var(--accent)}.hl2{color:var(--accent2)}
+.hero p{color:var(--muted);font-size:1.05rem;line-height:1.7;max-width:600px;margin:0 auto 2.5rem}
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:var(--accent);color:#0D0F14;padding:0.8rem 1.8rem;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+.btn-primary:hover{opacity:0.88}
+.btn-outline{background:transparent;color:var(--text);padding:0.8rem 1.8rem;border-radius:10px;font-weight:500;font-size:0.95rem;cursor:pointer;border:1px solid var(--border);font-family:'DM Sans',sans-serif;transition:border-color .2s}
+.btn-outline:hover{border-color:var(--muted)}
+.stats{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:720px;margin:3rem auto 0}
+.stat{flex:1;background:var(--bg2);padding:1.5rem;text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:700;color:var(--accent)}
+.stat-label{font-size:0.78rem;color:var(--muted);margin-top:0.2rem}
+
+/* ─── FEATURED BANNER ─── */
+.featured-wrap{padding:0 2.5rem;max-width:1000px;margin:3rem auto}
+.featured-banner{background:rgba(74,229,162,0.05);border:1px solid rgba(74,229,162,0.2);border-radius:20px;padding:2rem;position:relative;overflow:hidden}
+.feat-glow{position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(74,229,162,0.08) 0%,transparent 70%);pointer-events:none}
+.feat-label{font-size:0.72rem;font-weight:700;letter-spacing:1.5px;color:var(--accent2);margin-bottom:0.8rem}
+.feat-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:1rem}
+.feat-chips{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.2rem}
+.chip{display:inline-flex;align-items:center;gap:0.3rem;background:var(--bg3);border:1px solid var(--border);padding:0.35rem 0.75rem;border-radius:8px;font-size:0.8rem}
+.chip.green{background:rgba(74,229,162,0.1);border-color:rgba(74,229,162,0.25);color:var(--accent)}
+.chip.orange{background:rgba(255,154,60,0.1);border-color:rgba(255,154,60,0.25);color:var(--accent2)}
+.feat-desc{font-size:0.88rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem;max-width:640px}
+.feat-apply-btn{background:var(--accent);color:#0D0F14;padding:0.75rem 1.8rem;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;border:none;font-family:'Syne',sans-serif;transition:opacity .2s}
+.feat-apply-btn:hover{opacity:0.88}
+
+/* ─── SECTIONS ─── */
+.section{padding:4rem 2.5rem;max-width:1000px;margin:0 auto}
+.section-title{font-size:1.8rem;font-weight:700;margin-bottom:0.4rem;letter-spacing:-0.5px}
+.section-sub{color:var(--muted);font-size:0.9rem;margin-bottom:2.5rem}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem}
+.step{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem}
+.step-num{font-size:0.72rem;font-weight:700;color:var(--accent);letter-spacing:1px;margin-bottom:0.7rem}
+.step h3{font-size:0.98rem;font-weight:600;margin-bottom:0.5rem}
+.step p{font-size:0.83rem;color:var(--muted);line-height:1.6}
+
+/* ─── JOB CARDS ─── */
+.filters{display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:2rem}
+.filter-btn{background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:0.4rem 0.9rem;border-radius:100px;font-size:0.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{background:rgba(74,229,162,0.1);border-color:var(--accent);color:var(--accent)}
+.job-grid{display:grid;gap:1rem}
+.job-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:border-color .2s,transform .15s}
+.job-card:hover{border-color:rgba(74,229,162,0.4);transform:translateY(-1px)}
+.job-card.featured-card{border-color:rgba(74,229,162,0.3);background:rgba(74,229,162,0.02)}
+.job-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+.job-icon{width:44px;height:44px;border-radius:12px;background:rgba(74,229,162,0.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.job-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:600;margin-bottom:0.2rem}
+.job-place{font-size:0.82rem;color:var(--muted)}
+.badges{display:flex;gap:0.4rem;flex-wrap:wrap}
+.badge{padding:0.28rem 0.6rem;border-radius:6px;font-size:0.72rem;font-weight:600;white-space:nowrap}
+.badge.green{background:rgba(74,229,162,0.1);color:var(--accent);border:1px solid rgba(74,229,162,0.2)}
+.badge.orange{background:rgba(255,154,60,0.1);color:var(--accent2);border:1px solid rgba(255,154,60,0.2)}
+.badge.gray{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+.job-tags{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.tag{background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:0.25rem 0.6rem;border-radius:6px;font-size:0.75rem}
+.job-footer{display:flex;align-items:center;justify-content:space-between;padding-top:1rem;border-top:1px solid var(--border)}
+.salary{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700}
+.salary span{font-size:0.75rem;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400}
+.slots{font-size:0.78rem;color:var(--muted);display:flex;align-items:center;gap:0.3rem}
+.slot-dot{width:6px;height:6px;background:var(--accent);border-radius:50%}
+
+/* ─── MODALS ─── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2rem;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;margin:auto}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700}
+.modal-close{background:var(--bg3);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1.2rem}
+.detail-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0.9rem}
+.d-label{font-size:0.72rem;color:var(--muted);margin-bottom:0.3rem}
+.d-val{font-size:0.9rem;font-weight:500}
+.highlight-box{background:rgba(74,229,162,0.05);border:1px solid rgba(74,229,162,0.2);border-radius:14px;padding:1.2rem;margin:1rem 0}
+.highlight-box h4{font-size:0.88rem;font-weight:600;color:var(--accent);margin-bottom:0.7rem}
+.highlight-box ul{list-style:none;display:flex;flex-direction:column;gap:0.4rem}
+.highlight-box ul li{font-size:0.83rem;color:var(--muted);padding-left:1.2rem;position:relative}
+.highlight-box ul li::before{content:'✓';position:absolute;left:0;color:var(--accent);font-weight:700}
+.locked-section{background:rgba(255,154,60,0.05);border:1px dashed rgba(255,154,60,0.3);border-radius:12px;padding:1.2rem;margin:1rem 0;text-align:center}
+.lock-icon{font-size:1.8rem;margin-bottom:0.4rem}
+.locked-section h4{font-size:0.92rem;font-weight:600;margin-bottom:0.3rem}
+.locked-section p{font-size:0.8rem;color:var(--muted)}
+.btn-apply-modal{width:100%;background:var(--accent);color:#0D0F14;padding:0.9rem;border-radius:12px;font-weight:700;font-size:1rem;cursor:pointer;border:none;font-family:'Syne',sans-serif;margin-top:1rem;transition:opacity .2s}
+.btn-apply-modal:hover{opacity:0.88}
+.btn-apply-modal:disabled{opacity:0.5;cursor:not-allowed}
+.guarantee{font-size:0.75rem;color:var(--muted);text-align:center;margin-top:0.7rem}
+
+/* ─── APPLY FORM ─── */
+.form-group{margin-bottom:1.1rem}
+.form-label{font-size:0.82rem;color:var(--muted);font-weight:500;margin-bottom:0.4rem;display:block}
+.form-input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.72rem 1rem;border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:rgba(74,229,162,0.5)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.payment-box{background:rgba(74,229,162,0.05);border:1px solid rgba(74,229,162,0.2);border-radius:14px;padding:1.2rem;margin:1.2rem 0}
+.payment-box h4{font-size:0.9rem;font-weight:600;margin-bottom:0.8rem}
+.amount-big{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:var(--accent)}
+#card-element{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;margin-top:0.8rem}
+#card-errors{color:var(--danger);font-size:0.8rem;margin-top:0.4rem;min-height:1.2rem}
+
+/* ─── SUCCESS SCREEN ─── */
+.success-screen{text-align:center;padding:1.5rem 0.5rem}
+.success-icon{font-size:3rem;margin-bottom:1rem}
+.success-screen h2{font-family:'Syne',sans-serif;font-size:1.4rem;margin-bottom:0.8rem}
+.success-screen p{color:var(--muted);font-size:0.88rem;line-height:1.7}
+.email-confirm{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:1rem;margin:0.6rem 0;font-size:0.83rem;color:var(--muted);text-align:left}
+.email-confirm strong{color:var(--text);display:block;margin-bottom:0.3rem}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.8rem 1.5rem;border-radius:12px;font-size:0.88rem;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.success{border-color:rgba(74,229,162,0.4);color:var(--accent)}
+.toast.error{border-color:rgba(255,107,107,0.4);color:var(--danger)}
+
+/* ─── PRICING ─── */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem}
+.price-card{border-radius:12px;padding:1.3rem}
+.price-card.basic{background:var(--bg3);border:1px solid var(--border)}
+.price-card.bundle{background:rgba(74,229,162,0.06);border:1px solid rgba(74,229,162,0.25)}
+.price-tier{font-size:0.72rem;letter-spacing:1px;margin-bottom:0.4rem}
+.price-amount{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--accent)}
+.price-desc{font-size:0.8rem;color:var(--muted);margin-top:0.3rem}
+
+/* ─── FOOTER ─── */
+footer{border-top:1px solid var(--border);padding:2rem 2.5rem;text-align:center;color:var(--muted);font-size:0.82rem;margin-top:2rem}
+.brand-f{font-family:'Syne',sans-serif;font-size:1.1rem;margin-bottom:0.4rem;display:block;font-weight:700}
+
+/* ─── SPINNER ─── */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(13,15,20,0.3);border-top-color:#0D0F14;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="brand" onclick="showPage('home')">Work<span>Nest</span></div>
+  <ul class="nav-links">
+    <li><a onclick="showPage('home')">Home</a></li>
+    <li><a onclick="showPage('jobs')">Find Jobs</a></li>
+    <li><a onclick="showPage('how')">How it works</a></li>
+  </ul>
+  <button class="nav-cta" onclick="showPage('jobs')">Browse Jobs →</button>
+</nav>
+
+<!-- ════════ HOME PAGE ════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-badge"><div class="pulse"></div> For Indian Students · Across Europe</div>
+    <h1>Your first job in <span class="hl">Europe</span> starts <span class="hl2">here</span></h1>
+    <p>WorkNest connects Indian students with verified part-time jobs across Europe. Transparent pay, real timings, zero fraud. We handle the employer contact so you don't have to.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="showPage('jobs')">See Open Jobs</button>
+      <button class="btn-outline" onclick="showPage('how')">How it works</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">🇮🇳</div><div class="stat-label">Indian student focused</div></div>
+      <div class="stat"><div class="stat-num">€1</div><div class="stat-label">Per application</div></div>
+      <div class="stat"><div class="stat-num">30d</div><div class="stat-label">Update guarantee</div></div>
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Refund if no reply</div></div>
+    </div>
+  </div>
+
+  <!-- FEATURED JOB -->
+  <div class="featured-wrap">
+    <div class="featured-banner">
+      <div class="feat-glow"></div>
+      <div class="feat-label">🔥 NOW HIRING · PARIS</div>
+      <div class="feat-title">Restaurant Worker — Gare du Nord, Paris</div>
+      <div class="feat-chips">
+        <div class="chip green">€500–600 / month</div>
+        <div class="chip">11:00 AM – 5:00 PM</div>
+        <div class="chip orange">🍽️ Food provided</div>
+        <div class="chip">📍 Gare du Nord</div>
+        <div class="chip">1-day trial</div>
+        <div class="chip">1 leave / month</div>
+      </div>
+      <div class="feat-desc">Looking for a reliable team member for our restaurant near Gare du Nord. Food is provided every shift. Start with a 1-day trial — if it's a good fit, we discuss the contract. Full schedule and exact location are sent to your email after applying.</div>
+      <button class="feat-apply-btn" onclick="openJobById(99)">Apply Now — €1 →</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Why Indian students choose WorkNest</div>
+    <div class="section-sub">We know the struggles — language barriers, visa confusion, fraudulent listings. We fix all of that.</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">01 · VERIFIED</div><h3>Physical Verification</h3><p>Every listing collected in-person by visiting employers directly. No fake postings, ever.</p></div>
+      <div class="step"><div class="step-num">02 · TRANSPARENT</div><h3>Real Pay & Hours</h3><p>See exact monthly salary and shift timings before paying €1 to apply.</p></div>
+      <div class="step"><div class="step-num">03 · MANAGED</div><h3>We Introduce You</h3><p>We contact the employer with your profile and arrange the trial shift on your behalf.</p></div>
+      <div class="step"><div class="step-num">04 · GUARANTEED</div><h3>30-Day Refund</h3><p>No update in 30 days? Full €1 refund. Zero risk to you.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ JOBS PAGE ════════ -->
+<div id="page-jobs" class="page">
+  <div class="section">
+    <div class="section-title">Open Positions</div>
+    <div class="section-sub">All listings verified in-person. Schedule & location sent to your email after applying.</div>
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterJobs('all',this)">All</button>
+      <button class="filter-btn" onclick="filterJobs('part-time',this)">Part-time</button>
+      <button class="filter-btn" onclick="filterJobs('full-time',this)">Full-time</button>
+      <button class="filter-btn" onclick="filterJobs('food',this)">Food provided</button>
+      <button class="filter-btn" onclick="filterJobs('visa',this)">Visa friendly</button>
+    </div>
+    <div class="job-grid" id="job-grid"></div>
+  </div>
+</div>
+
+<!-- ════════ HOW IT WORKS ════════ -->
+<div id="page-how" class="page">
+  <div class="section">
+    <div class="section-title">How WorkNest works</div>
+    <div class="section-sub">Designed for Indian students navigating European job markets for the first time.</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">STEP 01</div><h3>Browse for free</h3><p>See salary, timings, location area, and perks — no signup needed.</p></div>
+      <div class="step"><div class="step-num">STEP 02</div><h3>Pay €1 to apply</h3><p>Fill your profile: age, visa expiry, availability, skills, CV. One application, one job slot.</p></div>
+      <div class="step"><div class="step-num">STEP 03</div><h3>We reach the employer</h3><p>WorkNest shares your profile with the employer and arranges your trial shift.</p></div>
+      <div class="step"><div class="step-num">STEP 04</div><h3>Check your email</h3><p>Full location, schedule, and contact details sent directly to your inbox within 24–48 hrs.</p></div>
+    </div>
+    <div style="margin-top:2.5rem;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2rem">
+      <h3 style="font-family:Syne,sans-serif;font-size:1.1rem;margin-bottom:1.2rem">Pricing</h3>
+      <div class="pricing-grid">
+        <div class="price-card basic">
+          <div class="price-tier" style="color:var(--muted)">SINGLE</div>
+          <div class="price-amount">€1</div>
+          <div class="price-desc">1 application · 1 year validity</div>
+        </div>
+        <div class="price-card bundle">
+          <div class="price-tier" style="color:var(--accent)">BUNDLE · BEST VALUE</div>
+          <div class="price-amount">€3</div>
+          <div class="price-desc">3 applications · 2 year validity</div>
+        </div>
+      </div>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:1rem">All applications include a 30-day update guarantee. No response = full refund, no questions asked.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ JOB DETAIL MODAL ════════ -->
+<div class="modal-overlay hidden" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div><div class="modal-title" id="m-title"></div><div style="font-size:0.83rem;color:var(--muted);margin-top:0.2rem" id="m-place"></div></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="m-body"></div>
+    <div class="locked-section">
+      <div class="lock-icon">🔒</div>
+      <h4>Exact address & schedule sent to your email</h4>
+      <p>Apply for €1 — we email you the full location, shift schedule, and trial day details</p>
+    </div>
+    <button class="btn-apply-modal" onclick="openApplyForm()">Apply Now — €1</button>
+    <p class="guarantee">🛡 30-day update guarantee · Full refund if no response</p>
+  </div>
+</div>
+
+<!-- ════════ APPLY MODAL ════════ -->
+<div class="modal-overlay hidden" id="apply-modal">
+  <div class="modal">
+
+    <!-- FORM -->
+    <div id="apply-form-content">
+      <div class="modal-header">
+        <div class="modal-title">Apply — €1</div>
+        <button class="modal-close" onclick="closeApply()">✕</button>
+      </div>
+      <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1.4rem">Fill in your details. After payment, we email you the full schedule, location, and employer contact within 24–48 hrs.</p>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Full name *</label>
+          <input class="form-input" type="text" id="f-name" placeholder="Your full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email address *</label>
+          <input class="form-input" type="email" id="f-email" placeholder="you@email.com">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Age *</label>
+          <input class="form-input" type="number" id="f-age" placeholder="24" min="18" max="40">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone / WhatsApp</label>
+          <input class="form-input" type="tel" id="f-phone" placeholder="+33 6 ...">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Visa / Titre de séjour expiry *</label>
+          <input class="form-input" type="date" id="f-visa">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Availability *</label>
+          <input class="form-input" type="text" id="f-avail" placeholder="e.g. Mon–Sat 11am–5pm">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Languages spoken</label>
+        <input class="form-input" type="text" id="f-lang" placeholder="English (C1), Hindi, French (A2)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Relevant experience</label>
+        <input class="form-input" type="text" id="f-exp" placeholder="e.g. 6 months restaurant work, customer service">
+      </div>
+
+      <!-- STRIPE CARD -->
+      <div class="payment-box">
+        <h4>Payment — €1.00</h4>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+          <div style="font-size:0.82rem;color:var(--muted)">1 application · 30-day refund guarantee</div>
+          <div class="amount-big">€1</div>
+        </div>
+        <div id="card-element"></div>
+        <div id="card-errors"></div>
+      </div>
+
+      <button class="btn-apply-modal" id="pay-btn" onclick="handlePayment()">Pay €1 & Submit Application</button>
+      <p class="guarantee">🔒 Secured by Stripe · Schedule & location emailed instantly after payment</p>
+    </div>
+
+    <!-- SUCCESS -->
+    <div id="apply-success" style="display:none" class="success-screen">
+      <div class="success-icon">🎉</div>
+      <h2>Application received!</h2>
+      <p>Thank you for applying through WorkNest. Here's what happens next:</p>
+      <div class="email-confirm"><strong>📧 Check your email</strong>We'll send you the full shift schedule, exact location near Gare du Nord, and trial day details within 24–48 hours.</div>
+      <div class="email-confirm"><strong>📋 Your 1-day trial</strong>Show up, give your best. If it's a good fit, the employer confirms your contract and further details.</div>
+      <div class="email-confirm"><strong>🛡 30-day guarantee</strong>No update in 30 days? Reply to your confirmation email and we'll refund your €1 in full.</div>
+      <button class="btn-primary" style="margin-top:1.5rem;width:100%" onclick="closeApply()">Back to listings</button>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <span class="brand-f">Work<span style="color:var(--accent)">Nest</span></span>
+  Built for Indian students in Europe · Verified listings · No fraud · €1 per application
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — Replace these values with your own keys
+══════════════════════════════════════════════════════ */
+const CONFIG = {
+  // 1. Get from https://dashboard.stripe.com/apikeys
+  //    Use your PUBLISHABLE key (starts with pk_)
+  STRIPE_PK: 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY',
+
+  // 2. Get from https://www.emailjs.com/
+  //    Service ID, Template IDs, and Public Key
+  EMAILJS_PUBLIC_KEY: 'YOUR_EMAILJS_PUBLIC_KEY',
+  EMAILJS_SERVICE_ID: 'YOUR_EMAILJS_SERVICE_ID',
+  EMAILJS_TEMPLATE_ADMIN: 'template_admin_notify',  // template you create for yourself
+  EMAILJS_TEMPLATE_STUDENT: 'template_student_confirm', // template for applicant
+
+  // 3. Your email — where application notifications go
+  ADMIN_EMAIL: 'your@email.com',
+};
+
+/* ═══════ JOB DATA ═══════ */
+const JOBS = [
+  {
+    id: 99, icon: '🍽️', title: 'Restaurant Worker', area: 'Gare du Nord, Paris',
+    type: 'part-time', salary: '€500–600/month', hours: '11:00 AM – 5:00 PM',
+    slots: 5, visaFriendly: true, food: true, trial: true, leave: '1 day/month',
+    tags: ['Restaurant', 'Food provided', '1-day trial', 'Stable hours'], featured: true,
+    desc: 'We are looking for a reliable team member for our restaurant near Gare du Nord. Food is provided on every shift. You start with a 1-day trial — if both sides are comfortable, we discuss the contract and further details. Full schedule and exact location are sent to your email after applying.'
+  },
+  {
+    id: 1, icon: '☕', title: 'Café Assistant', area: '5e Arrondissement, Paris',
+    type: 'part-time', salary: '€11.65/hr', hours: 'Mon–Fri 7:00–13:00',
+    slots: 2, visaFriendly: true, food: false, trial: false, leave: '',
+    tags: ['Café', 'Mornings', 'Flexible'],
+    desc: 'Morning café assistant role in the Latin Quarter. Serving customers, light food prep, and keeping the space tidy. French basics helpful but not required.'
+  },
+  {
+    id: 2, icon: '🛒', title: 'Supermarket Cashier', area: '13e Arrondissement, Paris',
+    type: 'part-time', salary: '€11.88/hr', hours: 'Evenings & Weekends',
+    slots: 4, visaFriendly: true, food: false, trial: false, leave: '',
+    tags: ['Retail', 'Evenings', 'Student-friendly'],
+    desc: 'Cashier role at a local supermarket. Flexible shifts that work around your study schedule. Basic French required for customer interaction.'
+  },
+  {
+    id: 3, icon: '🚴', title: 'Delivery Rider', area: 'Across Paris',
+    type: 'part-time', salary: '€12–15/hr', hours: 'Any shift — flexible',
+    slots: 5, visaFriendly: true, food: false, trial: false, leave: '',
+    tags: ['Delivery', 'Self-managed', 'No French needed'],
+    desc: 'Flexible delivery role across Paris. No French needed. Set your own schedule. Tips possible on top of base hourly rate. Bike or scooter required.'
+  },
+];
+
+/* ═══════ PAGE ROUTING ═══════ */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ═══════ TOAST ═══════ */
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+/* ═══════ JOB CARDS ═══════ */
+function renderJobs(list) {
+  document.getElementById('job-grid').innerHTML = list.map(j => `
+    <div class="job-card ${j.featured ? 'featured-card' : ''}" onclick="openJobById(${j.id})">
+      ${j.featured ? '<div style="font-size:0.72rem;font-weight:700;color:var(--accent2);letter-spacing:1px;margin-bottom:0.6rem">🔥 FEATURED · NOW HIRING</div>' : ''}
+      <div class="job-header">
+        <div style="display:flex;gap:0.8rem;align-items:flex-start">
+          <div class="job-icon">${j.icon}</div>
+          <div><div class="job-title">${j.title}</div><div class="job-place">📍 ${j.area}</div></div>
+        </div>
+        <div class="badges">
+          <div class="badge green">${j.type}</div>
+          ${j.food ? '<div class="badge orange">🍽️ Food</div>' : ''}
+          ${j.visaFriendly ? '<div class="badge gray">Visa ✓</div>' : ''}
+        </div>
+      </div>
+      <div class="job-tags">${j.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <div class="job-footer">
+        <div class="salary">${j.salary} <span>· ${j.hours}</span></div>
+        <div class="slots"><div class="slot-dot"></div> ${j.slots} slots open</div>
+      </div>
+    </div>
+  `).join('');
+}
+renderJobs(JOBS);
+
+function filterJobs(type, el) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const map = { all: JOBS, 'part-time': JOBS.filter(j => j.type === 'part-time'), 'full-time': JOBS.filter(j => j.type === 'full-time'), food: JOBS.filter(j => j.food), visa: JOBS.filter(j => j.visaFriendly) };
+  renderJobs(map[type] || JOBS);
+}
+
+/* ═══════ MODALS ═══════ */
+let currentJob = null;
+
+function openJobById(id) {
+  currentJob = JOBS.find(j => j.id === id);
+  if (!currentJob) return;
+  document.getElementById('m-title').textContent = currentJob.title;
+  document.getElementById('m-place').textContent = '📍 ' + currentJob.area;
+  document.getElementById('m-body').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><div class="d-label">Monthly salary</div><div class="d-val" style="color:var(--accent);font-family:Syne,sans-serif">${currentJob.salary}</div></div>
+      <div class="detail-item"><div class="d-label">Shift hours</div><div class="d-val">${currentJob.hours}</div></div>
+      <div class="detail-item"><div class="d-label">Job type</div><div class="d-val">${currentJob.type}</div></div>
+      <div class="detail-item"><div class="d-label">Slots open</div><div class="d-val">${currentJob.slots} / 5</div></div>
+      ${currentJob.leave ? `<div class="detail-item"><div class="d-label">Leave</div><div class="d-val">${currentJob.leave}</div></div>` : ''}
+      <div class="detail-item"><div class="d-label">Visa accepted</div><div class="d-val">${currentJob.visaFriendly ? '✅ Yes' : 'Not confirmed'}</div></div>
+    </div>
+    ${currentJob.food || currentJob.trial ? `
+    <div class="highlight-box">
+      <h4>Perks & conditions</h4>
+      <ul>
+        ${currentJob.food ? '<li>Food provided on every shift</li>' : ''}
+        ${currentJob.trial ? '<li>1-day trial — no pressure, see if it fits you</li>' : ''}
+        ${currentJob.leave ? `<li>${currentJob.leave} leave per month</li>` : ''}
+        <li>Contract discussed after trial if both sides agree</li>
+        <li>Schedule & exact location emailed after applying</li>
+      </ul>
+    </div>` : ''}
+    <p style="font-size:0.84rem;color:var(--muted);line-height:1.7">${currentJob.desc}</p>
+  `;
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+function openApplyForm() {
+  document.getElementById('modal').classList.add('hidden');
+  document.getElementById('apply-form-content').style.display = 'block';
+  document.getElementById('apply-success').style.display = 'none';
+  document.getElementById('apply-modal').classList.remove('hidden');
+  initStripe();
+}
+
+function closeApply() { document.getElementById('apply-modal').classList.add('hidden'); }
+
+/* ═══════ STRIPE ═══════ */
+let stripe, cardElement, stripeReady = false;
+
+function initStripe() {
+  if (stripeReady) return;
+  try {
+    stripe = Stripe(CONFIG.STRIPE_PK);
+    const elements = stripe.elements();
+    cardElement = elements.create('card', {
+      style: {
+        base: { color: '#F0F2F8', fontFamily: "'DM Sans', sans-serif", fontSize: '16px', '::placeholder': { color: '#7B82A0' } },
+        invalid: { color: '#FF6B6B' }
+      }
+    });
+    cardElement.mount('#card-element');
+    cardElement.on('change', e => {
+      document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
+    });
+    stripeReady = true;
+  } catch(e) {
+    document.getElementById('card-element').innerHTML = '<p style="color:var(--muted);font-size:0.82rem">⚠️ Add your Stripe publishable key in CONFIG to enable payments.</p>';
+  }
+}
+
+async function handlePayment() {
+  const name = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const age = document.getElementById('f-age').value.trim();
+  const visa = document.getElementById('f-visa').value;
+  const avail = document.getElementById('f-avail').value.trim();
+
+  if (!name || !email || !age || !visa || !avail) {
+    showToast('Please fill all required fields (*)', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Processing...';
+
+  try {
+    // In production: call your backend to create a PaymentIntent
+    // and get the clientSecret. For now we simulate success for demo.
+    if (CONFIG.STRIPE_PK.includes('YOUR_STRIPE')) {
+      // DEMO MODE — no real Stripe key
+      await new Promise(r => setTimeout(r, 1500));
+      await sendEmails(name, email, age, visa, avail);
+      showSuccess();
+      return;
+    }
+
+    // REAL STRIPE FLOW:
+    // const res = await fetch('/api/create-payment-intent', { method: 'POST' });
+    // const { clientSecret } = await res.json();
+    // const result = await stripe.confirmCardPayment(clientSecret, {
+    //   payment_method: { card: cardElement, billing_details: { name, email } }
+    // });
+    // if (result.error) throw new Error(result.error.message);
+    await sendEmails(name, email, age, visa, avail);
+    showSuccess();
+
+  } catch (err) {
+    showToast(err.message || 'Payment failed. Please try again.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = 'Pay €1 & Submit Application';
+  }
+}
+
+/* ═══════ EMAILJS ═══════ */
+async function sendEmails(name, email, age, visa, avail) {
+  const lang = document.getElementById('f-lang').value;
+  const exp = document.getElementById('f-exp').value;
+  const phone = document.getElementById('f-phone').value;
+
+  if (CONFIG.EMAILJS_PUBLIC_KEY.includes('YOUR_EMAILJS')) {
+    console.log('📧 Demo mode — EmailJS keys not set. Skipping email send.');
+    return;
+  }
+
+  emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY);
+
+  const params = {
+    job_title: currentJob?.title || 'Unknown job',
+    job_area: currentJob?.area || '',
+    student_name: name,
+    student_email: email,
+    student_age: age,
+    student_phone: phone || 'Not provided',
+    visa_expiry: visa,
+    availability: avail,
+    languages: lang || 'Not specified',
+    experience: exp || 'Not specified',
+    admin_email: CONFIG.ADMIN_EMAIL,
+  };
+
+  // Send notification to admin
+  await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ADMIN, params);
+
+  // Send confirmation to student
+  await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_STUDENT, {
+    ...params,
+    to_email: email,
+    to_name: name,
+  });
+}
+
+function showSuccess() {
+  document.getElementById('apply-form-content').style.display = 'none';
+  document.getElementById('apply-success').style.display = 'block';
+  showToast('Application submitted! Check your email 📧', 'success');
+}
+</script>
+</body>
+</html>
